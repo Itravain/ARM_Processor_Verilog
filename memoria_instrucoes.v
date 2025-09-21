@@ -1,5 +1,5 @@
 module memoria_instrucoes
-#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=11)
+#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=12)
 (
 	input [(DATA_WIDTH-1):0] data_a, data_b,
 	input [(ADDR_WIDTH-1):0] addr_a, addr_b,
