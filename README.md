@@ -42,6 +42,10 @@ O `memory_selector.v` mapeia endereços para os seguintes periféricos:
 * **Entrada de Usuário:**
     * Módulo (`modulo_entrada.v`) para ler dados a partir de switches.
 
+
+## Datapath
+![Datapath](images/datapath.png)
+
 ## Simulação
 
 Um testbench básico (`geral_tb.v`) é fornecido para verificar a funcionalidade principal. Ele instancia o módulo `geral` e simula a geração de clock e o acionamento dos switches de entrada (`switch_imediato` e `switch_continue`).
