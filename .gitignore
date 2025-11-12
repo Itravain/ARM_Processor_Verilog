@@ -6,6 +6,7 @@
 
 # Não ignora os arquivos com a extensão .v
 !*.v
+!*.png
 
 # Não ignora o próprio arquivo .gitignore
 !.gitignore
