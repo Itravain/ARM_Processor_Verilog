@@ -1,66 +1,59 @@
 /**
  * @module base_lim_reg
- * @brief Unidade de Proteção de Memória (MPU) com escrita centralizada.
+ * @brief Unidade de Proteção de Memória (MPU) simplificada (Apenas Base).
  *
- * Armazena registradores de base e limite para os segmentos de instrução e dados.
- * A escrita é controlada por uma única instrução, onde 'write_addr' atua como
- * um seletor para o registrador de destino.
- * A tradução de endereço (base + offset) e a verificação de limite são realizadas
- * de forma combinacional para os desvios.
+ * Controla o offset de base para instruções e dados separadamente.
+ * Funciona como um switch:
+ * - Se ativado (ON): 
+ * Adiciona 1850 aos endereços de instrução.
+ * Adiciona 1024 aos endereços de dados.
+ * - Se desativado (OFF): 
+ * Adiciona 0 aos endereços lógicos (pass-through).
  */
 module base_lim_reg (
-    // --- Interface de Escrita (controlada por uma instrução do SO) ---
+    // --- Interface de Controle (Switch ON/OFF) ---
     input wire         write_clock,       // Clock para a operação de escrita
-    input wire         we,                // Write Enable - ativa a escrita
-    input wire  [1:0]  write_addr,      // Seletor do registrador de destino:
-                                        // 00: base_inst, 01: limit_inst
-                                        // 10: base_data, 11: limit_data
-    input wire  [31:0] w_data,            // Dado de 32 bits a ser escrito
+    input wire         we,                // Write Enable - ativa a mudança de estado
 
-    // --- Interface de Tradução/Verificação (para o datapath) ---
-    input wire         jump,              // '1' se a instrução atual é um desvio
-    input wire  [31:0] in_inst_logical,   // Endereço LÓGICO do desvio
-	 input wire  [31:0] in_data_logical,   // Endereço LÓGICO para acesso a dados (se necessário)
+    // --- Interface de Tradução (para o datapath) ---
+    input wire  [31:0] in_inst_logical,   // Endereço LÓGICO da instrução
+    input wire  [31:0] in_data_logical,   // Endereço LÓGICO de dados
 
     // --- Saídas ---
     output reg [31:0] physical_addr_out, // Endereço FÍSICO traduzido para o PC
-	 output reg [31:0] out_base_lim_data,
-    output reg        seg_fault          // '1' se ocorrer uma falha de segmentação
+    output reg [31:0] out_base_lim_data  // Endereço FÍSICO traduzido para Dados
 );
 
-    // --- Armazenamento Interno: 4 registradores nomeados de 32 bits ---
-    reg [31:0] base_inst_reg;
-    reg [31:0] limit_inst_reg;
-    reg [31:0] base_data_reg;
-    reg [31:0] limit_data_reg;
+    // --- Armazenamento Interno ---
+    // Agora precisamos de dois registradores para bases diferentes
+    reg [31:0] base_inst; // Base para instruções (0 ou 1850)
+    reg [31:0] base_data; // Base para dados (0 ou 1024)
 
-    // Bloco 1: Lógica de Escrita SINCRONA
-    // Atualiza um dos quatro registradores no pulso de clock se 'we' estiver ativo.
+    initial begin
+        base_inst = 0;
+        base_data = 0;
+    end
+
+    // Bloco 1: Lógica de Controle (Switch)
     always @(posedge write_clock) begin
         if (we) begin
-            case (write_addr)
-                2'b00: base_inst_reg  <= w_data;
-                2'b01: limit_inst_reg <= w_data;
-                2'b10: base_data_reg  <= w_data;
-                2'b11: limit_data_reg <= w_data;
-            endcase
+            // Verifica se está "Desligado" (base é 0) para ligar
+            if (base_inst == 0) begin
+                base_inst <= 1850; // Define deslocamento de instrução
+                base_data <= 1024; // Define deslocamento de dados
+            end else begin
+                // Se já estava ligado, reseta ambos para 0
+                base_inst <= 0;
+                base_data <= 0;
+            end
         end
     end
 
-    // Bloco 2: Lógica de Tradução e Verificação COMBINACIONAL
-    // Esta lógica está sempre ativa, calculando as saídas com base nas entradas atuais.
+    // Bloco 2: Lógica de Tradução COMBINACIONAL
+    // Soma a base específica ao tipo de endereço
     always @(*) begin
-        // Verificação de Limite para Instruções
-        // A falha ocorre se um desvio tenta acessar um endereço LÓGICO maior ou igual ao limite.
-        if (jump && (in_inst_logical >= limit_inst_reg)) begin
-            seg_fault = 1'b1;
-        end else begin
-            // Adicionar aqui a verificação para acesso a dados se necessário
-            // Ex: if (mem_access && (in_data_logical >= limit_data_reg))
-            seg_fault = 1'b0;
-        end
-		  out_base_lim_data = in_data_logical + base_data_reg;
-        physical_addr_out = base_inst_reg + in_inst_logical;
+        physical_addr_out = in_inst_logical + base_inst; // Soma 1850 (se ON)
+        out_base_lim_data = in_data_logical + base_data; // Soma 1024 (se ON)
     end
 
 endmodule

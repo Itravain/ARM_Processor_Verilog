@@ -110,8 +110,9 @@ module unidade_instrucao (instrucao, in_cpsr, rn, rm, rd, imm, controle);
 					
 					/* SBL */
 					3'b100 : begin
-						r_rn = instrucao[22:18];
-						r_rm = instrucao[17:13];
+						// Removido para simplificar a lógica
+						// r_rn = instrucao[22:18];
+						// r_rm = instrucao[17:13];
 						/* sel, I, S, L/s, L=0, U, Opcode */
 						r_controle = {2'b11, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, {1'b0,instrucao[25:23]}};
 					end

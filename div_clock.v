@@ -1,8 +1,8 @@
 module div_clock
 #(
     // Mantemos os parâmetros para os outros modos
-    parameter FREQ_CLOCK = 25 , // 25 - run -> 1000000 debugFPGA - 2
-    parameter PERIODO_OUT = 2000000, // 2000000 - run -> 20 debugFPGA - 4
+    parameter FREQ_CLOCK = 25 , // 25 - run // 800000 debugFPGA // 2
+    parameter PERIODO_OUT = 2000000, // 2000000 - run // 20 debugFPGA // 4
     parameter PERIODO_NORMAL = 1
 )
 (

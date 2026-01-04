@@ -155,7 +155,7 @@ mux_link_ (
  
 dual_timer timer_inst (
   .clk(clock),
-  .rst(1'b0),
+  .rst(FinishInterrupt),
   .addr(io_addr[2:0]),
   .data_in(out_data),
   .write_enable(memWrite_Timer),
@@ -169,23 +169,19 @@ dual_timer timer_inst (
 display_multiplexado d_mlu( 
 	.fast_clk(input_clock),  // Clock de alta frequência para multiplexação (ex: 50MHz)
 	.proc_clk(clock),        // Clock do processador (lento)
-	.sel_clock(sel_clock),   // 2'b01 - debug -> sel_clock - run
-	.valor_in(dado_um),      //   dado_um - run 
+	.sel_clock(sel_clock),   // 2'b01 - debug // sel_clock - run
+	.valor_in(dado_um),      //   dado_um - run // 
 	.seg_out(seg_out),       // Saída para os 7 segmentos (a-g)
 	.anode_sel(anode_sel) 
 );
  
 base_lim_reg blr (
-		.write_clock(clock),
-		.we(RBaseLimWrite),
-		.write_addr(dado_um),
-		.w_data(dado_dois),
-		.jump(jump),
-		.in_inst_logical(imm),
-		.in_data_logical(io_addr),
-		.physical_addr_out(out_base_lim_inst),
-		.out_base_lim_data(out_base_lim_data),
-		.seg_fault(seg_fault)
+	.write_clock(clock),
+	.we(RBaseLimWrite),
+	.in_inst_logical(imm),
+	.in_data_logical(io_addr),
+	.physical_addr_out(out_base_lim_inst),
+	.out_base_lim_data(out_base_lim_data)
 );
 
  

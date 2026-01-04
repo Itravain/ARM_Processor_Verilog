@@ -34,10 +34,10 @@ module dual_timer #(
     // --- Bloco de Inicialização ---
     initial begin
         timer1_enable = 1'b0;
-        timer1_irq_enable = 1'b0;
+        timer1_irq_enable = 1'b1;
         timer1_prescaler = 32'd0;
         timer1_counter = 32'd0;
-        timer1_interrupt_period = 32'd0;
+        timer1_interrupt_period = 32'd50;
         timer1_prescaler_count = 32'd0;
 
         // Timer 2 configurado como contador de milissegundos
@@ -69,14 +69,15 @@ module dual_timer #(
         endcase
     end
     
+    // Bloco de escrita APENAS para registradores que NÃO mudam sozinhos (configurações)
     always @(posedge clk) begin
         if (write_enable) begin
             case (addr)
-                4'h0: timer1_enable <= data_in[0];
+                // 4'h0: REMOVIDO DAQUI (timer1_enable)
                 4'h1: timer1_irq_enable <= data_in[0];
                 4'h2: timer1_prescaler <= data_in;
                 4'h4: timer1_interrupt_period <= data_in;
-                4'h5: timer2_enable <= data_in[0];
+                // 4'h5: REMOVIDO DAQUI (timer2_enable)
                 4'h6: timer2_irq_enable <= data_in[0];
                 4'h7: timer2_prescaler <= data_in;
                 4'h9: timer2_interrupt_period <= data_in;
@@ -88,16 +89,26 @@ module dual_timer #(
     // --- Lógica do Contador 1 ---
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            // ... (lógica de reset)
+            timer1_enable <= 0;
+            timer1_counter <= 0;
+            timer1_prescaler_count <= 0;
+            irq1 <= 0;
         end else begin
             irq1 <= 1'b0;
-            if (timer1_enable) begin
+
+            // Prioridade 1: Escrita pelo processador (Liga/Desliga manual)
+            if (write_enable && addr == 4'h0) begin
+                timer1_enable <= data_in[0];
+            end
+            // Prioridade 2: Lógica do Timer
+            else if (timer1_enable) begin
                 if (timer1_prescaler_count >= timer1_prescaler) begin
                     timer1_prescaler_count <= 0;
                     if (timer1_counter >= timer1_interrupt_period && timer1_interrupt_period != 0) begin
                         timer1_counter <= 0;
                         if (timer1_irq_enable) begin
                            irq1 <= 1'b1;
+                           timer1_enable <= 0; // Auto-desligamento
                         end
                     end else begin
                         timer1_counter <= timer1_counter + 1;
@@ -112,10 +123,19 @@ module dual_timer #(
     // --- Lógica do Contador 2 ---
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-           // ... (lógica de reset)
+            timer2_enable <= 1'b1; 
+            timer2_counter <= 0;
+            timer2_prescaler_count <= 0;
+            irq2 <= 0;
         end else begin
             irq2 <= 1'b0;
-            if (timer2_enable) begin
+
+            // Prioridade 1: Escrita pelo processador
+            if (write_enable && addr == 4'h5) begin
+                timer2_enable <= data_in[0];
+            end
+            // Prioridade 2: Lógica do Timer
+            else if (timer2_enable) begin
                 if (timer2_prescaler_count >= timer2_prescaler) begin
                     timer2_prescaler_count <= 0;
                     if (timer2_counter >= timer2_interrupt_period && timer2_interrupt_period != 0) begin

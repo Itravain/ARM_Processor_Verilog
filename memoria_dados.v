@@ -2,7 +2,7 @@
 // Single part RAM with single read/write address
 
 module memoria_dados
-#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=10)
+#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=11)
 (
 	input [(DATA_WIDTH-1):0] data, 
 	input [(DATA_WIDTH-1):0] read_addr, write_addr,
