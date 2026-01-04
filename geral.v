@@ -68,9 +68,6 @@ wire [10:0] controle;
 wire [31:0] q;
 wire [31:0] out_mem_inst;
 
-//mux_link
-wire [31:0] out_mux_link;
-
 //pc
 wire [31:0] o_pc;
 
@@ -143,15 +140,7 @@ wire [1:0] outMemReg;
  // Sinais para o timer
  wire [31:0] timer_data_out;
  wire ClockInterrupt, MillisInterrupt;
- 
- 
-mux_link_ (
-	.control(ClockInterrupt),
-	.in_zero(link), 
-	.in_one(ClockInterrupt),
-	.m_out(out_mux_link),
-);
- 
+
  
 dual_timer timer_inst (
   .clk(clock),
@@ -287,13 +276,15 @@ div_clock u_div_cl(
 b_registradores u_breg(	.rn(rn), 
 	.rm(rm),
 	.rd(out_mux_entrada_registrador),
-	.sinal_link(out_mux_link),
+	.sinal_link(link),
+	.sinal_interrupt(ClockInterrupt),
 	.in_dados(out_mux_memoria_ula), 
 	.reg_write(regWrite),
 	.clock(clock),
 	.inv_clock(input_clock),
 	.in_cpsr(out_mux_cpsr),
 	.in_link(o_pc),
+	.in_prox_pc(out_mux_jump),
 	.dado_um(dado_um), 
 	.dado_dois(dado_dois), 
 	.out_cpsr(out_cpsr)	

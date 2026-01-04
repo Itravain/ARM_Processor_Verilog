@@ -1,8 +1,8 @@
 module b_registradores(
     input wire [4:0] rn, rm, rd,
-    input wire reg_write, clock, inv_clock, sinal_link,
+    input wire reg_write, clock, inv_clock, sinal_link, sinal_interrupt,
     input wire [3:0] in_cpsr,
-    input wire [31:0] in_dados, in_link,
+    input wire [31:0] in_dados, in_link, in_prox_pc,
     output reg [31:0] dado_um, dado_dois,
     output reg [3:0] out_cpsr
 );
@@ -24,7 +24,10 @@ module b_registradores(
 		end
         // Atualiza cpsr e link
 		if(sinal_link) begin
-			registradores[31] <= in_link;		  
+			registradores[31] <= in_link;
+		end
+		else if(sinal_interrupt) begin
+			registradores[22] <= in_prox_pc;
 		end
 			registradores[30] <= {28'b0, in_cpsr}; // Ajusta o tamanho para 32 bits
 
