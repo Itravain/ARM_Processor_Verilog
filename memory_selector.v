@@ -29,7 +29,7 @@ module memory_selector(
         io_addr           = 32'h0;
 
         case (select_bits)
-            //Memória RAM: 0x0000 a 0x07FF (2KB)
+            //Memória Principal: 0x0000 a 0x07FF (2KB)
             8'h00, 8'h01, 8'h02, 8'h03, 8'h04, 8'h05, 8'h06, 8'h07: begin
                 memWrite_ram = memWrite;
                 io_addr      = {21'b0, addr[10:0]};

@@ -20,14 +20,12 @@ module base_lim_reg (
     input wire  [31:0] in_data_logical,   // Endereço LÓGICO de dados
 
     // --- Saídas ---
-    output reg [31:0] physical_addr_out, // Endereço FÍSICO traduzido para o PC
-    output reg [31:0] out_base_lim_data  // Endereço FÍSICO traduzido para Dados
+    output reg [31:0] physical_addr_out,
+    output reg [31:0] out_base_lim_data 
 );
 
-    // --- Armazenamento Interno ---
-    // Agora precisamos de dois registradores para bases diferentes
-    reg [31:0] base_inst; // Base para instruções (0 ou 1850)
-    reg [31:0] base_data; // Base para dados (0 ou 1024)
+    reg [31:0] base_inst;
+    reg [31:0] base_data;
 
     initial begin
         base_inst = 0;
@@ -37,10 +35,10 @@ module base_lim_reg (
     // Bloco 1: Lógica de Controle (Switch)
     always @(posedge write_clock) begin
         if (we) begin
-            // Verifica se está "Desligado" (base é 0) para ligar
+            // Verifica se está "Desligado"
             if (base_inst == 0) begin
-                base_inst <= 1850; // Define deslocamento de instrução
-                base_data <= 1024; // Define deslocamento de dados
+                base_inst <= 1850; // Instrução
+                base_data <= 1024; // Dados
             end else begin
                 // Se já estava ligado, reseta ambos para 0
                 base_inst <= 0;
@@ -52,8 +50,8 @@ module base_lim_reg (
     // Bloco 2: Lógica de Tradução COMBINACIONAL
     // Soma a base específica ao tipo de endereço
     always @(*) begin
-        physical_addr_out = in_inst_logical + base_inst; // Soma 1850 (se ON)
-        out_base_lim_data = in_data_logical + base_data; // Soma 1024 (se ON)
+        physical_addr_out = in_inst_logical + base_inst; //1850 
+        out_base_lim_data = in_data_logical + base_data; //1024
     end
 
 endmodule

@@ -4,7 +4,6 @@ module modulo_interrupcao (
     input wire FinishInterrupt, ClockInterrupt, PrintInterruption,
     
     // Corrigido para [1:0] para corresponder à lógica do 'case'
-    // ou use [2:0] com 3'bxxx para 8 posições
     input wire [1:0] write_addr, 
     input wire [31:0] w_data,
     
@@ -19,7 +18,6 @@ module modulo_interrupcao (
     
 
     // Bloco de escrita (síncrono)
-    // Armazena os endereços de interrupção
     always @(posedge write_clock) begin
         if (InterruptWrite) begin
             case (write_addr)

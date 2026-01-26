@@ -29,8 +29,8 @@ module b_registradores(
 		else if(sinal_interrupt) begin
 			registradores[22] <= in_prox_pc;
 		end
-			registradores[30] <= {28'b0, in_cpsr}; // Ajusta o tamanho para 32 bits
-
+		registradores[30] <= {28'b0, in_cpsr}; // Ajusta o tamanho para 32 bits
+			
     end
 	 
 
