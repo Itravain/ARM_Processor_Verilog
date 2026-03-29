@@ -73,11 +73,9 @@ module dual_timer #(
     always @(posedge clk) begin
         if (write_enable) begin
             case (addr)
-                // 4'h0: REMOVIDO DAQUI (timer1_enable)
                 4'h1: timer1_irq_enable <= data_in[0];
                 4'h2: timer1_prescaler <= data_in;
                 4'h4: timer1_interrupt_period <= data_in;
-                // 4'h5: REMOVIDO DAQUI (timer2_enable)
                 4'h6: timer2_irq_enable <= data_in[0];
                 4'h7: timer2_prescaler <= data_in;
                 4'h9: timer2_interrupt_period <= data_in;
